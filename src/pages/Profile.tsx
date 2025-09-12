@@ -62,9 +62,8 @@ export default function Profile() {
     try {
       // Upload file to Supabase storage
       const fileExt = file.name.split('.').pop();
-      const fileName = `${user.id}.${fileExt}`;
-      const filePath = `${fileName}`;
-
+      const filePath = `${user.id}/${file.name}`; // Updated file path to use a folder
+      
       const { error: uploadError } = await supabase.storage
         .from('profile-pictures')
         .upload(filePath, file, { upsert: true });

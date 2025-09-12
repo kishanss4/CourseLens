@@ -26,41 +26,40 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const { toast } = useToast();
 
   useEffect(() => {
+    const fetchUserAndRole = async (currentSession: Session | null) => {
+      setSession(currentSession);
+      setUser(currentSession?.user ?? null);
+      
+      if (currentSession?.user) {
+        try {
+          const { data: roleData } = await supabase
+            .from('user_roles')
+            .select('role')
+            .eq('user_id', currentSession.user.id)
+            .single();
+          
+          setRole(roleData?.role as UserRole || 'student');
+        } catch (error) {
+          console.error('Error fetching user role:', error);
+          setRole('student');
+        }
+      } else {
+        setRole(null);
+      }
+      
+      setLoading(false);
+    };
+
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        setSession(session);
-        setUser(session?.user ?? null);
-        
-        if (session?.user) {
-          // Fetch user role
-          setTimeout(async () => {
-            try {
-              const { data: roleData } = await supabase
-                .from('user_roles')
-                .select('role')
-                .eq('user_id', session.user.id)
-                .single();
-              
-              setRole(roleData?.role as UserRole || 'student');
-            } catch (error) {
-              console.error('Error fetching user role:', error);
-              setRole('student');
-            }
-          }, 0);
-        } else {
-          setRole(null);
-        }
-        
-        setLoading(false);
+      (event, session) => {
+        fetchUserAndRole(session);
       }
     );
 
     // Check for existing session
     supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      setLoading(false);
+      fetchUserAndRole(session);
     });
 
     return () => subscription.unsubscribe();
