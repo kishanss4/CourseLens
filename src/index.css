@@ -2,121 +2,96 @@
 @tailwind components;
 @tailwind utilities;
 
-/* CourseLens Design System - Educational Excellence */
+/* CourseLens Premium Dark Design System - Enhanced with Icon Fixes */
 
 @layer base {
   :root {
-    /* Core educational theme - Blues and purples for trust and learning */
-    --background: 240 10% 98%;
-    --foreground: 224 71% 4%;
+    /* Premium Dark Theme - Enhanced with deeper contrasts */
+    --background: 220 25% 6%;
+    --foreground: 210 20% 96%;
 
-    --card: 0 0% 100%;
-    --card-foreground: 224 71% 4%;
+    --card: 220 22% 8%;
+    --card-foreground: 210 20% 95%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 224 71% 4%;
+    --popover: 220 22% 8%;
+    --popover-foreground: 210 20% 95%;
 
-    /* Primary: Educational blue-purple */
-    --primary: 233 84% 24%;
-    --primary-foreground: 0 0% 98%;
-    --primary-light: 233 84% 40%;
-    --primary-lighter: 233 84% 92%;
+    /* Primary: Enhanced purple-blue with better contrast */
+    --primary: 250 80% 68%;
+    --primary-foreground: 220 20% 98%;
+    --primary-light: 250 80% 75%;
+    --primary-lighter: 250 80% 18%;
+    --primary-dark: 250 80% 58%;
 
-    /* Secondary: Warm accent for highlights */
-    --secondary: 43 96% 85%;
-    --secondary-foreground: 233 84% 24%;
+    /* Secondary: Refined warm accent */
+    --secondary: 220 18% 16%;
+    --secondary-foreground: 210 20% 92%;
 
-    /* Muted tones for subtle elements */
-    --muted: 240 5% 96%;
-    --muted-foreground: 240 3.8% 46%;
+    /* Muted tones with better hierarchy */
+    --muted: 220 18% 13%;
+    --muted-foreground: 215 18% 68%;
 
-    /* Accent: Purple gradient endpoint */
-    --accent: 260 84% 35%;
-    --accent-foreground: 0 0% 98%;
+    /* Accent: Premium cyan-teal */
+    --accent: 185 90% 65%;
+    --accent-foreground: 220 22% 8%;
 
-    /* Status colors */
-    --success: 120 100% 25%;
+    /* Enhanced status colors */
+    --success: 145 80% 42%;
     --success-foreground: 0 0% 98%;
-    --warning: 38 92% 50%;
-    --warning-foreground: 39 100% 4%;
-    --destructive: 0 84% 60%;
+    --warning: 35 95% 58%;
+    --warning-foreground: 35 100% 8%;
+    --destructive: 0 88% 65%;
     --destructive-foreground: 0 0% 98%;
 
-    /* UI elements */
-    --border: 240 5.9% 90%;
-    --input: 240 5.9% 90%;
-    --ring: 233 84% 24%;
+    /* UI elements with premium contrast */
+    --border: 220 18% 20%;
+    --input: 220 18% 16%;
+    --ring: 250 80% 68%;
 
     /* Design tokens */
-    --radius: 0.75rem;
-    
-    /* Educational gradients */
-    --gradient-primary: linear-gradient(135deg, hsl(233 84% 24%), hsl(260 84% 35%));
-    --gradient-secondary: linear-gradient(135deg, hsl(43 96% 85%), hsl(38 92% 70%));
-    --gradient-hero: linear-gradient(135deg, hsl(233 84% 24%) 0%, hsl(260 84% 35%) 50%, hsl(280 84% 45%) 100%);
-    
-    /* Shadows for depth */
-    --shadow-soft: 0 2px 8px -1px hsl(233 84% 24% / 0.1);
-    --shadow-medium: 0 4px 16px -2px hsl(233 84% 24% / 0.15);
-    --shadow-strong: 0 8px 32px -4px hsl(233 84% 24% / 0.2);
-    
-    /* Animation timings */
-    --transition-fast: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
-    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --radius: 0.875rem;
 
-    --sidebar-background: 0 0% 98%;
+    /* Premium gradients - Enhanced */
+    --gradient-primary: linear-gradient(135deg, hsl(250 80% 68%), hsl(265 85% 72%), hsl(280 80% 76%));
+    --gradient-secondary: linear-gradient(135deg, hsl(185 90% 65%), hsl(170 85% 68%));
+    --gradient-hero: linear-gradient(
+      135deg,
+      hsl(250 80% 68%) 0%,
+      hsl(265 85% 72%) 35%,
+      hsl(280 80% 76%) 70%,
+      hsl(295 75% 80%) 100%
+    );
+    --gradient-card: linear-gradient(145deg, hsl(220 22% 8%) 0%, hsl(220 25% 10%) 50%, hsl(220 22% 9%) 100%);
+    --gradient-surface: linear-gradient(145deg, hsl(220 25% 6%), hsl(220 28% 8%));
+    --gradient-glass: linear-gradient(145deg, hsl(220 22% 8% / 0.9), hsl(220 25% 10% / 0.8));
 
-    --sidebar-foreground: 240 5.3% 26.1%;
+    /* Enhanced shadows with color tinting */
+    --shadow-soft: 0 2px 12px -2px hsl(220 25% 3% / 0.4);
+    --shadow-medium: 0 6px 24px -4px hsl(220 25% 3% / 0.5);
+    --shadow-strong: 0 12px 48px -8px hsl(220 25% 3% / 0.6);
+    --shadow-glow: 0 0 32px hsl(250 80% 68% / 0.25);
+    --shadow-accent: 0 8px 32px hsl(250 80% 68% / 0.2);
+    --shadow-colored: 0 4px 20px hsl(250 80% 68% / 0.15);
 
-    --sidebar-primary: 240 5.9% 10%;
+    /* Animation timings - Enhanced */
+    --transition-fast: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-smooth: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-bounce: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
 
-    --sidebar-primary-foreground: 0 0% 98%;
+    /* Sidebar colors - Enhanced */
+    --sidebar-background: 220 22% 7%;
+    --sidebar-foreground: 210 20% 92%;
+    --sidebar-primary: 250 80% 68%;
+    --sidebar-primary-foreground: 220 20% 98%;
+    --sidebar-accent: 220 18% 13%;
+    --sidebar-accent-foreground: 210 20% 92%;
+    --sidebar-border: 220 18% 18%;
+    --sidebar-ring: 250 80% 68%;
 
-    --sidebar-accent: 240 4.8% 95.9%;
-
-    --sidebar-accent-foreground: 240 5.9% 10%;
-
-    --sidebar-border: 220 13% 91%;
-
-    --sidebar-ring: 217.2 91.2% 59.8%;
-  }
-
-  .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
-
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
-
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
-
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    /* Glass effect variables - Enhanced */
+    --glass-bg: hsl(220 22% 8% / 0.85);
+    --glass-border: hsl(220 18% 28% / 0.4);
+    --glass-highlight: hsl(250 80% 68% / 0.1);
   }
 }
 
@@ -126,63 +101,138 @@
   }
 
   body {
-    @apply bg-background text-foreground font-sans;
+    @apply bg-background text-foreground font-sans antialiased;
+    background: var(--gradient-surface);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-track {
+    background: hsl(var(--muted));
+    border-radius: 5px;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, hsl(var(--primary) / 0.7), hsl(var(--accent) / 0.7));
+    border-radius: 5px;
+    border: 1px solid hsl(var(--border));
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(135deg, hsl(var(--primary) / 0.9), hsl(var(--accent) / 0.9));
+  }
+
+  /* Selection */
+  ::selection {
+    background: hsl(var(--primary) / 0.3);
+    color: hsl(var(--primary-foreground));
   }
 }
 
-/* Custom component styles */
 @layer components {
-  .hero-gradient {
-    background: var(--gradient-hero);
+  /* ICON FIXES */
+  .form-field-wrapper {
+    position: relative;
+    isolation: isolate;
   }
-  
-  .card-elevated {
-    box-shadow: var(--shadow-medium);
+
+  .input-icon {
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    height: 1.25rem;
+    width: 1.25rem;
+    color: hsl(var(--muted-foreground));
+    z-index: 20;
+    pointer-events: none;
+    transition: color 0.3s ease;
+  }
+
+  .form-field-wrapper.group:focus-within .input-icon,
+  .group:focus-within .input-icon {
+    color: hsl(var(--primary));
+  }
+
+  .password-toggle {
+    position: absolute;
+    right: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: hsl(var(--muted-foreground));
+    z-index: 20;
+    cursor: pointer;
+    padding: 0.25rem;
+    transition: color 0.3s ease;
+    background: transparent;
+    border: none;
+  }
+
+  .password-toggle:hover {
+    color: hsl(var(--primary));
+  }
+
+  .select-icon {
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    height: 1.25rem;
+    width: 1.25rem;
+    color: hsl(var(--muted-foreground));
+    z-index: 20;
+    pointer-events: none;
+  }
+
+  /* FIXED INPUTS (no blur on icons) */
+  .premium-input {
+    background: hsl(var(--input));
+    border: 1px solid hsl(var(--border));
     transition: var(--transition-smooth);
+    position: relative;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
   }
-  
-  .card-elevated:hover {
-    box-shadow: var(--shadow-strong);
-    transform: translateY(-2px);
-  }
-  
-  .btn-gradient {
-    background: var(--gradient-primary);
-    transition: var(--transition-smooth);
-  }
-  
-  .btn-gradient:hover {
-    opacity: 0.9;
+
+  .premium-input:focus {
+    border-color: hsl(var(--primary));
+    box-shadow: 0 0 0 3px hsl(var(--primary) / 0.15), var(--shadow-soft), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    background: hsl(var(--input));
     transform: translateY(-1px);
-    box-shadow: var(--shadow-medium);
+  }
+
+  /* ✅ Keep icons sharp */
+  .input-icon,
+  .select-icon,
+  .password-toggle {
+    filter: none !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    opacity: 1 !important;
+    visibility: visible !important;
   }
 }
 
-/* Educational animations */
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
+/* Mobile adjustments */
+@media (max-width: 768px) {
+  .input-icon,
+  .select-icon {
+    left: 0.75rem;
+    height: 1.125rem;
+    width: 1.125rem;
   }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes pulse-glow {
-  0%, 100% {
-    box-shadow: 0 0 20px hsl(233 84% 24% / 0.1);
-  }
-  50% {
-    box-shadow: 0 0 30px hsl(233 84% 24% / 0.2);
+  .password-toggle {
+    right: 0.75rem;
   }
 }
 
-.animate-fade-in-up {
-  animation: fadeInUp 0.6s ease-out;
-}
-
-.animate-pulse-glow {
-  animation: pulse-glow 2s ease-in-out infinite;
+/* Accessibility */
+.focus-visible:focus-visible {
+  outline: 2px solid hsl(var(--primary));
+  outline-offset: 3px;
+  border-radius: 0.25rem;
+  box-shadow: 0 0 0 4px hsl(var(--primary) / 0.2);
 }

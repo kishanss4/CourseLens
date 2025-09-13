@@ -1,269 +1,350 @@
-import { useState, useEffect, useRef } from 'react';
-import { User, Mail, Phone, Calendar, MapPin, Camera, Upload } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Navigation } from '@/components/Navigation';
-import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/hooks/useAuth';
-import { useToast } from '@/hooks/use-toast';
+"use client"
+
+import type React from "react"
+import { useState, useEffect, useRef } from "react"
+import { User, Mail, Phone, Calendar, MapPin, Camera, Shield, Edit3, Save, X } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Textarea } from "@/components/ui/textarea"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Navigation } from "@/components/Navigation"
+import { supabase } from "@/integrations/supabase/client"
+import { useAuth } from "@/hooks/useAuth"
+import { useToast } from "@/hooks/use-toast"
 
 export default function Profile() {
-  const { user } = useAuth();
-  const { toast } = useToast();
-  const [loading, setLoading] = useState(false);
-  const [uploadingImage, setUploadingImage] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const { user } = useAuth()
+  const { toast } = useToast()
+  const [loading, setLoading] = useState(false)
+  const [uploadingImage, setUploadingImage] = useState(false)
+  const [isEditing, setIsEditing] = useState(false)
+  const fileInputRef = useRef<HTMLInputElement>(null)
   const [profile, setProfile] = useState({
-    name: '',
-    phone: '',
-    date_of_birth: '',
-    address: '',
-    profile_picture_url: '',
-  });
+    name: "",
+    phone: "",
+    date_of_birth: "",
+    address: "",
+    profile_picture_url: "",
+  })
 
   useEffect(() => {
-    fetchProfile();
-  }, [user]);
+    fetchProfile()
+  }, [user])
 
   const fetchProfile = async () => {
-    if (!user) return;
-
+    if (!user) return
     try {
-      const { data } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('user_id', user.id)
-        .maybeSingle();
-
+      const { data } = await supabase.from("profiles").select("*").eq("user_id", user.id).maybeSingle()
       if (data) {
         setProfile({
-          name: data.name || '',
-          phone: data.phone || '',
-          date_of_birth: data.date_of_birth || '',
-          address: data.address || '',
-          profile_picture_url: data.profile_picture_url || '',
-        });
+          name: data.name || "",
+          phone: data.phone || "",
+          date_of_birth: data.date_of_birth || "",
+          address: data.address || "",
+          profile_picture_url: data.profile_picture_url || "",
+        })
       }
     } catch (error) {
-      console.error('Error fetching profile:', error);
+      console.error("Error fetching profile:", error)
     }
-  };
+  }
 
   const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file || !user) return;
-
-    setUploadingImage(true);
-
+    const file = event.target.files?.[0]
+    if (!file || !user) return
+    setUploadingImage(true)
     try {
-      // Upload file to Supabase storage
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${user.id}.${fileExt}`;
-      const filePath = `${fileName}`;
-
+      const fileExt = file.name.split(".").pop()
+      const fileName = `${user.id}.${fileExt}`
+      const filePath = `${fileName}`
       const { error: uploadError } = await supabase.storage
-        .from('profile-pictures')
-        .upload(filePath, file, { upsert: true });
-
-      if (uploadError) throw uploadError;
-
-      // Get public URL
-      const { data } = supabase.storage
-        .from('profile-pictures')
-        .getPublicUrl(filePath);
-
-      // Update profile with new image URL
-      const updatedProfile = { ...profile, profile_picture_url: data.publicUrl };
-      setProfile(updatedProfile);
-
+        .from("profile-pictures")
+        .upload(filePath, file, { upsert: true })
+      if (uploadError) throw uploadError
+      const { data } = supabase.storage.from("profile-pictures").getPublicUrl(filePath)
+      const updatedProfile = { ...profile, profile_picture_url: data.publicUrl }
+      setProfile(updatedProfile)
       const { error: updateError } = await supabase
-        .from('profiles')
+        .from("profiles")
         .update({ profile_picture_url: data.publicUrl })
-        .eq('user_id', user.id);
-
-      if (updateError) throw updateError;
-
-      toast({
-        title: "Success!",
-        description: "Profile picture updated successfully",
-      });
+        .eq("user_id", user.id)
+      if (updateError) throw updateError
+      toast({ title: "Success!", description: "Profile picture updated successfully" })
     } catch (error: any) {
       toast({
         title: "Error",
         description: error.message || "Failed to upload profile picture",
         variant: "destructive",
-      });
+      })
     } finally {
-      setUploadingImage(false);
+      setUploadingImage(false)
     }
-  };
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-
+    e.preventDefault()
+    setLoading(true)
     try {
-      const { error } = await supabase
-        .from('profiles')
-        .update(profile)
-        .eq('user_id', user?.id);
-
-      if (error) throw error;
-
-      toast({
-        title: "Success!",
-        description: "Profile updated successfully",
-      });
+      const { error } = await supabase.from("profiles").update(profile).eq("user_id", user?.id)
+      if (error) throw error
+      toast({ title: "Success!", description: "Profile updated successfully" })
+      setIsEditing(false)
     } catch (error: any) {
       toast({
         title: "Error",
         description: error.message || "Failed to update profile",
         variant: "destructive",
-      });
+      })
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
   const initials = profile.name
-    ? profile.name.split(' ').map(n => n[0]).join('')
-    : user?.email?.substring(0, 2).toUpperCase();
+    ? profile.name.split(" ").map((n) => n[0]).join("")
+    : user?.email?.substring(0, 2).toUpperCase()
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-gradient-to-br from-background via-muted/5 to-primary/3">
       <Navigation />
-      
-      <div className="max-w-2xl mx-auto p-6">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-foreground mb-2">Profile Settings</h1>
-          <p className="text-muted-foreground">Manage your personal information</p>
+
+      <div className="max-w-4xl mx-auto p-6">
+        <div className="mb-10 animate-fade-in-up">
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center space-x-4">
+              <div className="relative">
+                <div className="absolute inset-0 bg-gradient-primary rounded-2xl blur-xl opacity-60"></div>
+                <div className="relative p-3 bg-gradient-primary rounded-2xl shadow-strong">
+                  <User className="h-8 w-8 text-primary-foreground" />
+                </div>
+              </div>
+              <div>
+                <h1 className="text-4xl font-bold text-gradient mb-2">Profile Settings</h1>
+                <p className="text-muted-foreground text-lg">Manage your personal information and preferences</p>
+              </div>
+            </div>
+            <Button
+              onClick={() => setIsEditing(!isEditing)}
+              variant={isEditing ? "destructive" : "default"}
+              className={isEditing ? "bg-destructive hover:bg-destructive/90" : "btn-gradient"}
+            >
+              {isEditing ? (
+                <>
+                  <X className="h-4 w-4 mr-2" /> Cancel
+                </>
+              ) : (
+                <>
+                  <Edit3 className="h-4 w-4 mr-2" /> Edit Profile
+                </>
+              )}
+            </Button>
+          </div>
+          <div className="w-40 h-1.5 bg-gradient-primary rounded-full shadow-glow"></div>
         </div>
 
-        <Card className="card-elevated">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Profile Picture Card */}
+          <Card className="card-elevated glass-card animate-fade-in-up lg:col-span-1">
+            <CardHeader className="text-center">
+              <CardTitle className="text-xl">Profile Picture</CardTitle>
+              <CardDescription>Update your avatar</CardDescription>
+            </CardHeader>
+            <CardContent className="flex flex-col items-center space-y-6">
+              <div className="relative group">
+                <div className="absolute inset-0 bg-gradient-primary rounded-full blur-xl opacity-40 group-hover:opacity-60 transition-opacity"></div>
+                <Avatar className="relative h-32 w-32 border-4 border-border/50 shadow-strong">
+                  <AvatarImage src={profile.profile_picture_url || "/placeholder.svg"} alt="Profile" className="object-cover" />
+                  <AvatarFallback className="text-2xl font-bold bg-gradient-primary text-primary-foreground">
+                    {initials}
+                  </AvatarFallback>
+                </Avatar>
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="secondary"
+                  className="absolute -bottom-2 -right-2 h-10 w-10 rounded-full p-0 shadow-medium border-2 border-background"
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={uploadingImage}
+                >
+                  {uploadingImage ? (
+                    <div className="animate-spin h-5 w-5 border-2 border-current border-t-transparent rounded-full" />
+                  ) : (
+                    <Camera className="h-5 w-5" />
+                  )}
+                </Button>
+                <input ref={fileInputRef} type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
+              </div>
+              <div className="text-center">
+                <p className="text-sm text-muted-foreground mb-2">Click the camera icon to upload a new profile picture</p>
+                <p className="text-xs text-muted-foreground/80">Supported formats: JPG, PNG, GIF (max 5MB)</p>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Personal Information Form */}
+          <Card className="card-elevated glass-card animate-fade-in-up lg:col-span-2" style={{ animationDelay: "0.1s" }}>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-3 text-xl">
+                <Shield className="h-6 w-6 text-primary" /> Personal Information
+              </CardTitle>
+              <CardDescription className="text-base">
+                {isEditing ? "Update your profile details below" : "Your current profile information"}
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <form onSubmit={handleSubmit} className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* Full Name */}
+                  <div className="space-y-3">
+                    <Label htmlFor="name" className="text-sm font-semibold">Full Name</Label>
+                    <div className="form-field-wrapper group">
+                      <User className="input-icon" />
+                      <Input
+                        id="name"
+                        value={profile.name}
+                        onChange={(e) => setProfile({ ...profile, name: e.target.value })}
+                        className="pl-12 h-12 premium-input"
+                        placeholder="Your full name"
+                        disabled={!isEditing}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Email (disabled) */}
+                  <div className="space-y-3">
+                    <Label htmlFor="email" className="text-sm font-semibold">Email Address</Label>
+                    <div className="form-field-wrapper group">
+                      <Mail className="input-icon" />
+                      <Input
+                        id="email"
+                        value={user?.email || ""}
+                        className="pl-12 h-12 bg-muted/30 border-border/30 text-muted-foreground"
+                        disabled
+                      />
+                    </div>
+                    <p className="text-xs text-muted-foreground">Email cannot be changed</p>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* Phone */}
+                  <div className="space-y-3">
+                    <Label htmlFor="phone" className="text-sm font-semibold">Phone Number</Label>
+                    <div className="form-field-wrapper group">
+                      <Phone className="input-icon" />
+                      <Input
+                        id="phone"
+                        value={profile.phone}
+                        onChange={(e) => setProfile({ ...profile, phone: e.target.value })}
+                        className="pl-12 h-12 premium-input"
+                        placeholder="Your phone number"
+                        disabled={!isEditing}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Date of Birth */}
+                  <div className="space-y-3">
+                    <Label htmlFor="dob" className="text-sm font-semibold">Date of Birth</Label>
+                    <div className="form-field-wrapper group">
+                      <Calendar className="input-icon" />
+                      <Input
+                        id="dob"
+                        type="date"
+                        value={profile.date_of_birth}
+                        onChange={(e) => setProfile({ ...profile, date_of_birth: e.target.value })}
+                        className="pl-12 h-12 premium-input"
+                        disabled={!isEditing}
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Address */}
+                <div className="space-y-3">
+                  <Label htmlFor="address" className="text-sm font-semibold">Address</Label>
+                  <div className="form-field-wrapper group">
+                    <MapPin className="input-icon top-4" />
+                    <Textarea
+                      id="address"
+                      value={profile.address}
+                      onChange={(e) => setProfile({ ...profile, address: e.target.value })}
+                      className="pl-12 min-h-[100px] resize-none premium-input"
+                      placeholder="Your full address"
+                      disabled={!isEditing}
+                    />
+                  </div>
+                </div>
+
+                {/* Save / Cancel */}
+                {isEditing && (
+                  <div className="flex justify-end space-x-4 pt-6 border-t border-border/50">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => {
+                        setIsEditing(false)
+                        fetchProfile()
+                      }}
+                      className="px-6"
+                    >
+                      Cancel
+                    </Button>
+                    <Button type="submit" disabled={loading} className="btn-gradient px-8">
+                      {loading ? (
+                        <div className="flex items-center space-x-2">
+                          <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                          <span>Saving...</span>
+                        </div>
+                      ) : (
+                        <div className="flex items-center space-x-2">
+                          <Save className="h-4 w-4" />
+                          <span>Save Changes</span>
+                        </div>
+                      )}
+                    </Button>
+                  </div>
+                )}
+              </form>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Security Card */}
+        <Card className="card-elevated glass-card animate-fade-in-up mt-8" style={{ animationDelay: "0.2s" }}>
           <CardHeader>
-            <CardTitle>Personal Information</CardTitle>
-            <CardDescription>
-              Update your profile details and contact information
-            </CardDescription>
+            <CardTitle className="flex items-center gap-3 text-xl">
+              <Shield className="h-6 w-6 text-warning" /> Account Security
+            </CardTitle>
+            <CardDescription className="text-base">Manage your account security and privacy settings</CardDescription>
           </CardHeader>
           <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-6">
-              {/* Profile Picture Section */}
-              <div className="flex flex-col items-center space-y-4">
-                <div className="relative">
-                  <Avatar className="h-24 w-24">
-                    <AvatarImage src={profile.profile_picture_url} alt="Profile" />
-                    <AvatarFallback className="text-lg">{initials}</AvatarFallback>
-                  </Avatar>
-                  <Button
-                    type="button"
-                    size="sm"
-                    variant="secondary"
-                    className="absolute -bottom-2 -right-2 h-8 w-8 rounded-full p-0"
-                    onClick={() => fileInputRef.current?.click()}
-                    disabled={uploadingImage}
-                  >
-                    {uploadingImage ? (
-                      <div className="animate-spin h-4 w-4 border-2 border-current border-t-transparent rounded-full" />
-                    ) : (
-                      <Camera className="h-4 w-4" />
-                    )}
-                  </Button>
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept="image/*"
-                    onChange={handleImageUpload}
-                    className="hidden"
-                  />
-                </div>
-                <div className="text-center">
-                  <p className="text-sm text-muted-foreground">
-                    Click the camera icon to upload a new profile picture
-                  </p>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="p-4 bg-muted/20 rounded-xl border border-border/50">
+                <h4 className="font-semibold text-foreground mb-2">Account Status</h4>
+                <div className="flex items-center space-x-2">
+                  <div className="w-3 h-3 bg-success rounded-full animate-pulse"></div>
+                  <span className="text-sm text-success font-medium">Active & Verified</span>
                 </div>
               </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="name">Full Name</Label>
-                <div className="relative">
-                  <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    id="name"
-                    value={profile.name}
-                    onChange={(e) => setProfile({ ...profile, name: e.target.value })}
-                    className="pl-9"
-                    placeholder="Your full name"
-                  />
-                </div>
+              <div className="p-4 bg-muted/20 rounded-xl border border-border/50">
+                <h4 className="font-semibold text-foreground mb-2">Last Login</h4>
+                <p className="text-sm text-muted-foreground">
+                  {new Date().toLocaleDateString("en-US", {
+                    month: "long",
+                    day: "numeric",
+                    year: "numeric",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}
+                </p>
               </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="email">Email (Read Only)</Label>
-                <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    id="email"
-                    value={user?.email || ''}
-                    className="pl-9 bg-muted"
-                    disabled
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="phone">Phone Number</Label>
-                <div className="relative">
-                  <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    id="phone"
-                    value={profile.phone}
-                    onChange={(e) => setProfile({ ...profile, phone: e.target.value })}
-                    className="pl-9"
-                    placeholder="Your phone number"
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="dob">Date of Birth</Label>
-                <div className="relative">
-                  <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    id="dob"
-                    type="date"
-                    value={profile.date_of_birth}
-                    onChange={(e) => setProfile({ ...profile, date_of_birth: e.target.value })}
-                    className="pl-9"
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="address">Address</Label>
-                <div className="relative">
-                  <MapPin className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                  <Textarea
-                    id="address"
-                    value={profile.address}
-                    onChange={(e) => setProfile({ ...profile, address: e.target.value })}
-                    className="pl-9 min-h-[80px] resize-none"
-                    placeholder="Your full address"
-                  />
-                </div>
-              </div>
-
-              <Button type="submit" disabled={loading} className="w-full btn-gradient">
-                {loading ? 'Saving...' : 'Save Changes'}
-              </Button>
-            </form>
+            </div>
           </CardContent>
         </Card>
       </div>
     </div>
-  );
+  )
 }
