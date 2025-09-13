@@ -44,7 +44,7 @@ It provides a scalable and user-friendly system for handling courses, user profi
 
 ### 1. Clone the Repository
 ```bash
-git clone https://github.com/yourusername/courselens.git
+git clone https://github.com/kishanss4/courselens.git
 cd courselens
 ```
 
