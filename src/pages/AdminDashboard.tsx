@@ -286,14 +286,18 @@ export default function AdminDashboard() {
 
   const handleDeleteStudent = async (userId: string) => {
     try {
-      const { error } = await supabase.auth.admin.deleteUser(userId);
+      const { error } = await supabase.functions.invoke('delete-user', {
+        body: { userId }
+      });
+      
       if (error) throw error;
+      
       toast({ title: "Success", description: "Student deleted successfully" });
       fetchAdminData();
     } catch (error: any) {
       toast({
         title: "Error",
-        description: error.message,
+        description: error.message || "Failed to delete student",
         variant: "destructive",
       });
     }

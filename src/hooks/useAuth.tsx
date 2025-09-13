@@ -26,40 +26,41 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const { toast } = useToast();
 
   useEffect(() => {
-    const fetchUserAndRole = async (currentSession: Session | null) => {
-      setSession(currentSession);
-      setUser(currentSession?.user ?? null);
-      
-      if (currentSession?.user) {
-        try {
-          const { data: roleData } = await supabase
-            .from('user_roles')
-            .select('role')
-            .eq('user_id', currentSession.user.id)
-            .single();
-          
-          setRole(roleData?.role as UserRole || 'student');
-        } catch (error) {
-          console.error('Error fetching user role:', error);
-          setRole('student');
-        }
-      } else {
-        setRole(null);
-      }
-      
-      setLoading(false);
-    };
-
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
-        fetchUserAndRole(session);
+      async (event, session) => {
+        setSession(session);
+        setUser(session?.user ?? null);
+        
+        if (session?.user) {
+          // Fetch user role
+          setTimeout(async () => {
+            try {
+              const { data: roleData } = await supabase
+                .from('user_roles')
+                .select('role')
+                .eq('user_id', session.user.id)
+                .maybeSingle();
+              
+              setRole(roleData?.role as UserRole || 'student');
+            } catch (error) {
+              console.error('Error fetching user role:', error);
+              setRole('student');
+            }
+          }, 0);
+        } else {
+          setRole(null);
+        }
+        
+        setLoading(false);
       }
     );
 
     // Check for existing session
     supabase.auth.getSession().then(({ data: { session } }) => {
-      fetchUserAndRole(session);
+      setSession(session);
+      setUser(session?.user ?? null);
+      setLoading(false);
     });
 
     return () => subscription.unsubscribe();
@@ -95,7 +96,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       const redirectUrl = `${window.location.origin}/`;
       
-      const { error } = await supabase.auth.signUp({
+      const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
@@ -113,7 +114,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           description: error.message,
           variant: "destructive",
         });
-      } else {
+      } else if (data.user) {
+        // Assign role using the secure function
+        await supabase.rpc('assign_role_if_missing', { p_role: role });
+        
         toast({
           title: "Success!",
           description: "Please check your email to verify your account.",

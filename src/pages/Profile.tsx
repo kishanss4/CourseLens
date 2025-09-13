@@ -37,7 +37,7 @@ export default function Profile() {
         .from('profiles')
         .select('*')
         .eq('user_id', user.id)
-        .single();
+        .maybeSingle();
 
       if (data) {
         setProfile({
@@ -62,8 +62,9 @@ export default function Profile() {
     try {
       // Upload file to Supabase storage
       const fileExt = file.name.split('.').pop();
-      const filePath = `${user.id}/${file.name}`; // Updated file path to use a folder
-      
+      const fileName = `${user.id}.${fileExt}`;
+      const filePath = `${fileName}`;
+
       const { error: uploadError } = await supabase.storage
         .from('profile-pictures')
         .upload(filePath, file, { upsert: true });

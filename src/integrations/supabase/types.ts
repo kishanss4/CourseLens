@@ -147,6 +147,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      assign_role_if_missing: {
+        Args: { p_role: Database["public"]["Enums"]["app_role"] }
+        Returns: undefined
+      }
       get_current_user_role: {
         Args: Record<PropertyKey, never>
         Returns: Database["public"]["Enums"]["app_role"]
