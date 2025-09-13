@@ -1,5 +1,3 @@
-"use client"
-
 import type React from "react"
 
 import { useState } from "react"
@@ -15,7 +13,7 @@ import { useAuth } from "@/hooks/useAuth"
 import { useToast } from "@/hooks/use-toast"
 
 export default function Auth() {
-  const { user, signIn, signUp } = useAuth()
+  const { user, signIn, signUp, role, loading } = useAuth() // include loading here
   const { toast } = useToast()
   const [isLoading, setIsLoading] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
@@ -31,9 +29,8 @@ export default function Auth() {
   })
 
   // Redirect based on role after login
-  const { role } = useAuth()
-
-  if (user && role) {
+  if (user && !loading && role) {
+    console.log("Redirecting user with role:", role)
     if (role === "admin") {
       return <Navigate to="/admin" replace />
     } else {
@@ -122,19 +119,24 @@ export default function Auth() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-muted/10 to-primary/5 flex items-center justify-center p-4 relative overflow-hidden">
+    <div 
+      className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden bg-gradient-to-br from-background via-muted/5 to-primary/3"
+    >
+      {/* Background overlay */}
+      <div className="absolute inset-0 bg-background/30" />
+      
+      {/* Additional animated background effects */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/8 rounded-full blur-3xl animate-pulse-glow"></div>
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/8 rounded-full blur-3xl animate-pulse-soft"></div>
         <div
-          className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-accent/8 rounded-full blur-3xl animate-pulse-glow"
+          className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-accent/8 rounded-full blur-3xl animate-pulse-soft"
           style={{ animationDelay: "2s" }}
         ></div>
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-gradient-to-r from-primary/5 to-accent/5 rounded-full blur-3xl animate-float"></div>
-
-        <div className="absolute inset-0 bg-pattern-dots opacity-30"></div>
       </div>
 
+      {/* content */}
       <div className="w-full max-w-md relative z-10">
+        {/* branding */}
         <div className="text-center mb-10 animate-fade-in-up">
           <div className="flex justify-center mb-8">
             <div className="relative group">
@@ -149,13 +151,10 @@ export default function Auth() {
           </div>
           <h1 className="text-5xl font-bold text-gradient mb-4 tracking-tight">CourseLens</h1>
           <p className="text-muted-foreground text-xl mb-2">Course Feedback & Management Platform</p>
-          <p className="text-muted-foreground/80 text-sm flex items-center justify-center gap-2">
-            <Shield className="h-4 w-4" />
-            Secure • Modern • Intuitive
-          </p>
           <div className="w-32 h-1 bg-gradient-primary mx-auto mt-6 rounded-full"></div>
         </div>
 
+        {/* form */}
         <Card className="card-elevated glass-card animate-fade-in-up border-gradient shadow-strong">
           <CardHeader className="text-center pb-4">
             <CardTitle className="text-3xl text-gradient mb-2">Welcome</CardTitle>
@@ -180,6 +179,7 @@ export default function Auth() {
                 </TabsTrigger>
               </TabsList>
 
+              {/* sign in */}
               <TabsContent value="signin" className="animate-scale-in">
                 <form onSubmit={handleSignIn} className="space-y-7">
                   <div className="space-y-3">
@@ -245,8 +245,10 @@ export default function Auth() {
                 </form>
               </TabsContent>
 
+              {/* sign up */}
               <TabsContent value="signup" className="animate-scale-in">
                 <form onSubmit={handleSignUp} className="space-y-6">
+                  {/* name */}
                   <div className="space-y-3">
                     <Label htmlFor="signup-name" className="text-foreground font-semibold text-sm">
                       Full Name
@@ -265,6 +267,7 @@ export default function Auth() {
                     </div>
                   </div>
 
+                  {/* email */}
                   <div className="space-y-3">
                     <Label htmlFor="signup-email" className="text-foreground font-semibold text-sm">
                       Email Address
@@ -283,6 +286,7 @@ export default function Auth() {
                     </div>
                   </div>
 
+                  {/* password */}
                   <div className="space-y-3">
                     <Label htmlFor="signup-password" className="text-foreground font-semibold text-sm">
                       Password
@@ -308,6 +312,7 @@ export default function Auth() {
                     </div>
                   </div>
 
+                  {/* confirm password */}
                   <div className="space-y-3">
                     <Label htmlFor="signup-confirm" className="text-foreground font-semibold text-sm">
                       Confirm Password
@@ -326,6 +331,7 @@ export default function Auth() {
                     </div>
                   </div>
 
+                  {/* role */}
                   <div className="space-y-3">
                     <Label htmlFor="signup-role" className="text-foreground font-semibold text-sm">
                       Account Type
@@ -383,19 +389,6 @@ export default function Auth() {
         <div className="text-center mt-10 animate-fade-in-up">
           <div className="bg-card/50 backdrop-blur-sm px-6 py-4 rounded-2xl border border-border/50 shadow-soft">
             <p className="text-muted-foreground text-sm font-medium mb-2">POSSPOLE Web Application Assignment</p>
-            <div className="flex items-center justify-center space-x-4 text-xs text-muted-foreground/80">
-              <span className="flex items-center space-x-1">
-                <Shield className="h-3 w-3" />
-                <span>Secure</span>
-              </span>
-              <span>•</span>
-              <span className="flex items-center space-x-1">
-                <Sparkles className="h-3 w-3" />
-                <span>Modern</span>
-              </span>
-              <span>•</span>
-              <span>Premium Design</span>
-            </div>
           </div>
         </div>
       </div>

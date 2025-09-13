@@ -20,7 +20,7 @@ export type Database = {
           created_at: string
           description: string | null
           id: string
-          is_active: boolean
+          is_active: boolean | null
           name: string
           updated_at: string
         }
@@ -29,7 +29,7 @@ export type Database = {
           created_at?: string
           description?: string | null
           id?: string
-          is_active?: boolean
+          is_active?: boolean | null
           name: string
           updated_at?: string
         }
@@ -38,7 +38,7 @@ export type Database = {
           created_at?: string
           description?: string | null
           id?: string
-          is_active?: boolean
+          is_active?: boolean | null
           name?: string
           updated_at?: string
         }
@@ -87,8 +87,9 @@ export type Database = {
           address: string | null
           created_at: string
           date_of_birth: string | null
+          email: string
           id: string
-          is_blocked: boolean
+          is_blocked: boolean | null
           name: string
           phone: string | null
           profile_picture_url: string | null
@@ -99,8 +100,9 @@ export type Database = {
           address?: string | null
           created_at?: string
           date_of_birth?: string | null
+          email: string
           id?: string
-          is_blocked?: boolean
+          is_blocked?: boolean | null
           name: string
           phone?: string | null
           profile_picture_url?: string | null
@@ -111,8 +113,9 @@ export type Database = {
           address?: string | null
           created_at?: string
           date_of_birth?: string | null
+          email?: string
           id?: string
-          is_blocked?: boolean
+          is_blocked?: boolean | null
           name?: string
           phone?: string | null
           profile_picture_url?: string | null
@@ -148,12 +151,8 @@ export type Database = {
     }
     Functions: {
       assign_role_if_missing: {
-        Args: { p_role: Database["public"]["Enums"]["app_role"] }
+        Args: { role_name: string; user_id: string }
         Returns: undefined
-      }
-      get_current_user_role: {
-        Args: Record<PropertyKey, never>
-        Returns: Database["public"]["Enums"]["app_role"]
       }
       has_role: {
         Args: {

@@ -1,20 +1,15 @@
-"use client"
-
 import { useState } from "react"
-import { Link, useLocation, useNavigate } from "react-router-dom"
-import {
-  GraduationCap,
-  LayoutDashboard,
-  MessageSquare,
-  User,
-  Settings,
-  LogOut,
+import { Link, useNavigate, useLocation } from "react-router-dom"
+import { 
+  GraduationCap, 
+  LogOut, 
+  User, 
+  MessageSquare, 
+  BarChart3, 
+  Users, 
+  BookOpen,
   Menu,
-  X,
-  Shield,
-  Users,
-  BarChart3,
-  Sparkles,
+  X
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -27,70 +22,66 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { useAuth } from "@/hooks/useAuth"
+import { useToast } from "@/hooks/use-toast"
 
 export function Navigation() {
-  const { user, role, signOut } = useAuth()
-  const location = useLocation()
+  const { user, signOut, role } = useAuth()
   const navigate = useNavigate()
+  const location = useLocation()
+  const { toast } = useToast()
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
 
   const handleSignOut = async () => {
     await signOut()
-    navigate("/auth")
+    toast({
+      title: "Signed out successfully",
+      description: "You have been signed out of your account.",
+    })
+    navigate("/")
   }
 
-  const navItems =
-    role === "admin"
-      ? [
-          { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
-          { href: "/admin/users", label: "Users", icon: Users },
-          { href: "/admin/courses", label: "Courses", icon: GraduationCap },
-          { href: "/admin/analytics", label: "Analytics", icon: BarChart3 },
-        ]
-      : [
-          { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-          { href: "/feedback", label: "Feedback", icon: MessageSquare },
-          { href: "/profile", label: "Profile", icon: User },
-        ]
+  const isActive = (path: string) => location.pathname === path
 
-  const initials = user?.email?.substring(0, 2).toUpperCase() || "U"
+  const studentNavItems = [
+    { path: "/dashboard", label: "Dashboard", icon: BarChart3 },
+    { path: "/feedback", label: "Feedback", icon: MessageSquare },
+    { path: "/profile", label: "Profile", icon: User },
+  ]
+
+  const adminNavItems = [
+    { path: "/admin", label: "Dashboard", icon: BarChart3 },
+    { path: "/admin/students", label: "Students", icon: Users },
+    { path: "/admin/courses", label: "Courses", icon: BookOpen },
+  ]
+
+  const navItems = role === "admin" ? adminNavItems : studentNavItems
+
+  if (!user) return null
 
   return (
-    <nav className="sticky top-0 z-50 w-full border-b border-border/50 bg-background/80 backdrop-blur-xl supports-[backdrop-filter]:bg-background/60">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between h-16">
-          {/* Logo and Brand */}
-          <div className="flex items-center">
-            <Link to={role === "admin" ? "/admin" : "/dashboard"} className="flex items-center space-x-3 group">
-              <div className="relative">
-                <div className="absolute inset-0 bg-gradient-primary rounded-xl blur-md opacity-60 group-hover:opacity-80 transition-opacity"></div>
-                <div className="relative p-2 bg-gradient-primary rounded-xl shadow-colored">
-                  <GraduationCap className="h-6 w-6 text-primary-foreground" />
-                </div>
-              </div>
-              <div className="hidden sm:block">
-                <h1 className="text-xl font-bold text-gradient">CourseLens</h1>
-                <p className="text-xs text-muted-foreground -mt-1">
-                  {role === "admin" ? "Admin Portal" : "Student Portal"}
-                </p>
-              </div>
-            </Link>
-          </div>
+    <nav className="sticky top-0 z-50 w-full border-b border-border bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/60">
+      <div className="container-fluid">
+        <div className="flex h-16 items-center justify-between">
+          {/* Logo */}
+          <Link to={role === "admin" ? "/admin" : "/dashboard"} className="flex items-center space-x-2">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-primary">
+              <GraduationCap className="h-5 w-5 text-primary-foreground" />
+            </div>
+            <span className="text-xl font-bold text-gradient-primary">CourseLens</span>
+          </Link>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center space-x-1">
+          <div className="hidden md:flex md:items-center md:space-x-6">
             {navItems.map((item) => {
               const Icon = item.icon
-              const isActive = location.pathname === item.href
-
               return (
                 <Link
-                  key={item.href}
-                  to={item.href}
-                  className={`nav-item flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 ${
-                    isActive
-                      ? "bg-gradient-primary text-primary-foreground shadow-colored"
-                      : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                  key={item.path}
+                  to={item.path}
+                  className={`flex items-center space-x-2 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
+                    isActive(item.path)
+                      ? "bg-accent text-accent-foreground"
+                      : "text-muted-foreground hover:text-foreground hover:bg-accent/50"
                   }`}
                 >
                   <Icon className="h-4 w-4" />
@@ -102,96 +93,82 @@ export function Navigation() {
 
           {/* User Menu */}
           <div className="flex items-center space-x-4">
-            {/* Role Badge */}
-            <div
-              className={`hidden sm:flex items-center space-x-2 px-3 py-1.5 rounded-full text-xs font-medium border ${
-                role === "admin"
-                  ? "bg-warning/10 text-warning border-warning/20"
-                  : "bg-primary/10 text-primary border-primary/20"
-              }`}
-            >
-              {role === "admin" ? <Shield className="h-3 w-3" /> : <Sparkles className="h-3 w-3" />}
-              <span className="capitalize">{role}</span>
-            </div>
-
-            {/* User Dropdown */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button
-                  variant="ghost"
-                  className="relative h-10 w-10 rounded-full hover:ring-2 hover:ring-primary/20 transition-all"
-                >
-                  <Avatar className="h-10 w-10 border-2 border-border/50">
-                    <AvatarImage src="/placeholder.svg" alt="Profile" />
-                    <AvatarFallback className="bg-gradient-primary text-primary-foreground font-semibold">
-                      {initials}
+                <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+                  <Avatar className="h-8 w-8">
+                    <AvatarImage src={user.user_metadata?.avatar_url} />
+                    <AvatarFallback className="bg-gradient-primary text-primary-foreground">
+                      {user.user_metadata?.full_name?.[0] || user.email?.[0]?.toUpperCase()}
                     </AvatarFallback>
                   </Avatar>
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-56 glass-card border-border/50" align="end" forceMount>
+              <DropdownMenuContent className="w-56" align="end" forceMount>
                 <DropdownMenuLabel className="font-normal">
                   <div className="flex flex-col space-y-1">
-                    <p className="text-sm font-medium leading-none">{user?.email}</p>
-                    <p className="text-xs leading-none text-muted-foreground capitalize">{role} Account</p>
+                    <p className="text-sm font-medium leading-none">
+                      {user.user_metadata?.full_name || "User"}
+                    </p>
+                    <p className="text-xs leading-none text-muted-foreground">
+                      {user.email}
+                    </p>
+                    <p className="text-xs leading-none text-muted-foreground capitalize">
+                      {role} Account
+                    </p>
                   </div>
                 </DropdownMenuLabel>
-                <DropdownMenuSeparator className="bg-border/50" />
-                <DropdownMenuItem asChild className="cursor-pointer hover:bg-muted/50">
-                  <Link to="/profile" className="flex items-center">
-                    <User className="mr-2 h-4 w-4" />
-                    <span>Profile</span>
-                  </Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild className="cursor-pointer hover:bg-muted/50">
-                  <Link to="/settings" className="flex items-center">
-                    <Settings className="mr-2 h-4 w-4" />
-                    <span>Settings</span>
-                  </Link>
-                </DropdownMenuItem>
-                <DropdownMenuSeparator className="bg-border/50" />
-                <DropdownMenuItem
-                  onClick={handleSignOut}
-                  className="cursor-pointer text-destructive hover:bg-destructive/10 hover:text-destructive focus:bg-destructive/10 focus:text-destructive"
-                >
+                <DropdownMenuSeparator />
+                {role === "student" && (
+                  <DropdownMenuItem asChild>
+                    <Link to="/profile" className="flex items-center">
+                      <User className="mr-2 h-4 w-4" />
+                      Profile
+                    </Link>
+                  </DropdownMenuItem>
+                )}
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={handleSignOut}>
                   <LogOut className="mr-2 h-4 w-4" />
-                  <span>Log out</span>
+                  Sign out
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
 
-            {/* Mobile Menu Button */}
+            {/* Mobile menu button */}
             <Button
               variant="ghost"
-              size="sm"
+              size="icon"
               className="md:hidden"
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             >
-              {isMobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+              {isMobileMenuOpen ? (
+                <X className="h-5 w-5" />
+              ) : (
+                <Menu className="h-5 w-5" />
+              )}
             </Button>
           </div>
         </div>
 
         {/* Mobile Navigation */}
         {isMobileMenuOpen && (
-          <div className="md:hidden border-t border-border/50 bg-background/95 backdrop-blur-xl">
-            <div className="px-2 pt-2 pb-3 space-y-1">
+          <div className="md:hidden">
+            <div className="space-y-1 px-2 pb-3 pt-2">
               {navItems.map((item) => {
                 const Icon = item.icon
-                const isActive = location.pathname === item.href
-
                 return (
                   <Link
-                    key={item.href}
-                    to={item.href}
+                    key={item.path}
+                    to={item.path}
                     onClick={() => setIsMobileMenuOpen(false)}
-                    className={`flex items-center space-x-3 px-3 py-3 rounded-lg text-base font-medium transition-all duration-300 ${
-                      isActive
-                        ? "bg-gradient-primary text-primary-foreground shadow-colored"
-                        : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                    className={`flex items-center space-x-2 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
+                      isActive(item.path)
+                        ? "bg-accent text-accent-foreground"
+                        : "text-muted-foreground hover:text-foreground hover:bg-accent/50"
                     }`}
                   >
-                    <Icon className="h-5 w-5" />
+                    <Icon className="h-4 w-4" />
                     <span>{item.label}</span>
                   </Link>
                 )

@@ -33,26 +33,39 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setUser(session?.user ?? null);
         
         if (session?.user) {
-          // Fetch user role
-          setTimeout(async () => {
-            try {
-              const { data: roleData } = await supabase
-                .from('user_roles')
-                .select('role')
-                .eq('user_id', session.user.id)
-                .maybeSingle();
-              
-              setRole(roleData?.role as UserRole || 'student');
-            } catch (error) {
-              console.error('Error fetching user role:', error);
-              setRole('student');
-            }
-          }, 0);
+          // Check role in metadata first
+          const metadataRole = session.user.user_metadata?.role as string | undefined;
+          if (metadataRole && (metadataRole === 'admin' || metadataRole === 'student')) {
+            setRole(metadataRole as UserRole);
+            setLoading(false);
+          } else {
+            // Fetch user role from database
+            setTimeout(async () => {
+              try {
+                console.log('Fetching role for user:', session.user.id);
+                const { data: roleData, error } = await supabase
+                  .from('user_roles')
+                  .select('role')
+                  .eq('user_id', session.user.id)
+                  .maybeSingle();
+                
+                console.log('Role data:', roleData, 'Error:', error);
+                
+                const userRole = roleData?.role as UserRole || 'student';
+                console.log('Setting role to:', userRole);
+                setRole(userRole);
+                setLoading(false);
+              } catch (error) {
+                console.error('Error fetching user role:', error);
+                setRole('student');
+                setLoading(false);
+              }
+            }, 0);
+          }
         } else {
           setRole(null);
+          setLoading(false);
         }
-        
-        setLoading(false);
       }
     );
 
@@ -60,7 +73,36 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       setUser(session?.user ?? null);
-      setLoading(false);
+      
+      if (session?.user) {
+        // Check role in metadata first
+        const metadataRole = session.user.user_metadata?.role as string | undefined;
+        if (metadataRole && (metadataRole === 'admin' || metadataRole === 'student')) {
+          setRole(metadataRole as UserRole);
+          setLoading(false);
+        } else {
+          // Fetch user role from database
+          setTimeout(async () => {
+            try {
+              const { data: roleData, error } = await supabase
+                .from('user_roles')
+                .select('role')
+                .eq('user_id', session.user.id)
+                .maybeSingle();
+              
+              const userRole = roleData?.role as UserRole || 'student';
+              setRole(userRole);
+              setLoading(false);
+            } catch (error) {
+              console.error('Error fetching user role:', error);
+              setRole('student');
+              setLoading(false);
+            }
+          }, 0);
+        }
+      } else {
+        setLoading(false);
+      }
     });
 
     return () => subscription.unsubscribe();
@@ -96,35 +138,77 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       const redirectUrl = `${window.location.origin}/`;
       
-      const { data, error } = await supabase.auth.signUp({
+      const { data, error: signUpError } = await supabase.auth.signUp({
         email,
         password,
         options: {
           emailRedirectTo: redirectUrl,
           data: {
+            full_name: name,
             name: name,
             role: role,
           },
         },
       });
       
-      if (error) {
+      if (signUpError) {
         toast({
           title: "Sign Up Failed",
-          description: error.message,
+          description: signUpError.message,
           variant: "destructive",
         });
-      } else if (data.user) {
-        // Assign role using the secure function
-        await supabase.rpc('assign_role_if_missing', { p_role: role });
-        
-        toast({
-          title: "Success!",
-          description: "Please check your email to verify your account.",
-        });
+        return { error: signUpError };
+      }
+
+      if (data.user) {
+        try {
+          // Wait a moment for the user to be fully created
+          await new Promise(resolve => setTimeout(resolve, 100));
+
+          // Create profile record with name and email
+          const { error: profileError } = await supabase
+            .from("profiles")
+            .insert({
+              user_id: data.user.id,
+              name: name,
+              email: email,
+              phone: null,
+              date_of_birth: null,
+              address: null,
+              profile_picture_url: null,
+              is_blocked: false
+            });
+
+          if (profileError) {
+            console.error("Profile creation error:", profileError);
+          }
+
+          // Assign role using the secure function
+          const { error: roleError } = await supabase.rpc('assign_role_if_missing', { 
+            user_id: data.user?.id,
+            role_name: role 
+          });
+          
+          if (roleError) {
+            console.error("Role assignment error:", roleError);
+          }
+
+          toast({
+            title: "Success!",
+            description: "Please check your email to verify your account.",
+          });
+
+        } catch (insertError: any) {
+          console.error("Error creating profile/role:", insertError);
+          toast({
+            title: "Account Created",
+            description: "Account created but there was an issue setting up your profile. You can update it later.",
+            variant: "destructive",
+          });
+        }
       }
       
-      return { error };
+      return { error: null };
     } catch (error: any) {
       toast({
         title: "Sign Up Failed",

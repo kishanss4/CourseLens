@@ -39,11 +39,32 @@ export default function Profile() {
       const { data } = await supabase.from("profiles").select("*").eq("user_id", user.id).maybeSingle()
       if (data) {
         setProfile({
-          name: data.name || "",
+          name: data.name || user.user_metadata?.full_name || "",
           phone: data.phone || "",
           date_of_birth: data.date_of_birth || "",
           address: data.address || "",
           profile_picture_url: data.profile_picture_url || "",
+        })
+      } else {
+        // If no profile exists, create one with metadata
+        const newProfile = {
+          name: user.user_metadata?.full_name || "",
+          phone: "",
+          date_of_birth: "",
+          address: "",
+          profile_picture_url: "",
+        }
+        setProfile(newProfile)
+        
+        // Create the profile record
+        await supabase.from("profiles").insert({
+          user_id: user.id,
+          name: user.user_metadata?.full_name || "",
+          email: user.email,
+          phone: null,
+          date_of_birth: null,
+          address: null,
+          profile_picture_url: null
         })
       }
     } catch (error) {
@@ -57,8 +78,8 @@ export default function Profile() {
     setUploadingImage(true)
     try {
       const fileExt = file.name.split(".").pop()
-      const fileName = `${user.id}.${fileExt}`
-      const filePath = `${fileName}`
+      const fileName = `avatar.${fileExt}`
+      const filePath = `${user.id}/${fileName}`
       const { error: uploadError } = await supabase.storage
         .from("profile-pictures")
         .upload(filePath, file, { upsert: true })
@@ -87,8 +108,32 @@ export default function Profile() {
     e.preventDefault()
     setLoading(true)
     try {
-      const { error } = await supabase.from("profiles").update(profile).eq("user_id", user?.id)
-      if (error) throw error
+      // Check if profile exists, if not create it
+      const { data: existingProfile } = await supabase
+        .from("profiles")
+        .select("id")
+        .eq("user_id", user?.id)
+        .maybeSingle()
+
+      if (existingProfile) {
+        // Update existing profile
+        const { error } = await supabase
+          .from("profiles")
+          .update(profile)
+          .eq("user_id", user?.id)
+        if (error) throw error
+      } else {
+        // Create new profile
+        const { error } = await supabase
+          .from("profiles")
+          .insert({
+            user_id: user?.id,
+            email: user?.email,
+            ...profile
+          })
+        if (error) throw error
+      }
+
       toast({ title: "Success!", description: "Profile updated successfully" })
       setIsEditing(false)
     } catch (error: any) {
@@ -102,9 +147,24 @@ export default function Profile() {
     }
   }
 
-  const initials = profile.name
-    ? profile.name.split(" ").map((n) => n[0]).join("")
-    : user?.email?.substring(0, 2).toUpperCase()
+  // Improved initials calculation
+  const getInitials = () => {
+    if (profile.name && profile.name.trim()) {
+      return profile.name.trim().split(" ").map((n) => n[0]).join("").toUpperCase()
+    }
+    if (user?.user_metadata?.full_name) {
+      return user.user_metadata.full_name.split(" ").map((n: string) => n[0]).join("").toUpperCase()
+    }
+    if (user?.email) {
+      return user.email.substring(0, 2).toUpperCase()
+    }
+    return "U"
+  }
+
+  const initials = getInitials()
+
+  // Display name priority: profile.name -> user metadata -> email
+  const displayName = profile.name || user?.user_metadata?.full_name || user?.email || "Unknown User"
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-muted/5 to-primary/3">
@@ -122,7 +182,8 @@ export default function Profile() {
               </div>
               <div>
                 <h1 className="text-4xl font-bold text-gradient mb-2">Profile Settings</h1>
-                <p className="text-muted-foreground text-lg">Manage your personal information and preferences</p>
+                <p className="text-muted-foreground text-lg">Welcome, {displayName}</p>
+                <p className="text-muted-foreground text-sm">Manage your personal information and preferences</p>
               </div>
             </div>
             <Button
@@ -210,6 +271,11 @@ export default function Profile() {
                         disabled={!isEditing}
                       />
                     </div>
+                    {!profile.name && !isEditing && (
+                      <p className="text-xs text-muted-foreground">
+                        Name not set. Click "Edit Profile" to add your name.
+                      </p>
+                    )}
                   </div>
 
                   {/* Email (disabled) */}

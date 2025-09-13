@@ -156,6 +156,7 @@ export default function AdminDashboard() {
       const { data: profilesData } = await supabase.from("profiles").select(`
           user_id, 
           name, 
+          email,
           profile_picture_url,
           phone,
           date_of_birth,
@@ -171,8 +172,8 @@ export default function AdminDashboard() {
       const feedbackWithDetails =
         feedbackData?.map((feedback) => {
           const profile = profilesData?.find((p) => p.user_id === feedback.user_id)
-          const user = usersData?.users?.find((u) => u.id === feedback.user_id)
-          const course = coursesData?.find((c) => c.id === feedback.course_id)
+          const user = (usersData?.users as any)?.find((u: any) => u.id === feedback.user_id)
+          const course = (coursesData as any)?.find((c: any) => c.id === feedback.course_id)
           return {
             ...feedback,
             user_name: profile?.name || "Unknown",
@@ -185,11 +186,10 @@ export default function AdminDashboard() {
 
       const studentsWithDetails =
         profilesData?.map((profile) => {
-          const user = usersData?.users?.find((u) => u.id === profile.user_id)
           return {
             ...profile,
             id: profile.user_id,
-            email: user?.email || "Unknown",
+            email: profile.email || "No email found",
           }
         }) || []
 
@@ -664,7 +664,13 @@ export default function AdminDashboard() {
                               variant={
                                 feedback.rating >= 4 ? "default" : feedback.rating >= 3 ? "secondary" : "destructive"
                               }
-                              className="bg-gradient-to-r from-yellow-500 to-orange-500 text-white"
+                              className={
+                                feedback.rating >= 4 
+                                  ? "bg-gradient-to-r from-green-500 to-green-600 text-white"
+                                  : feedback.rating >= 3 
+                                  ? "bg-gradient-to-r from-yellow-500 to-yellow-600 text-white"
+                                  : "bg-gradient-to-r from-red-500 to-red-600 text-white"
+                              }
                             >
                               {feedback.rating} ⭐
                             </Badge>
@@ -908,14 +914,13 @@ export default function AdminDashboard() {
                               </Avatar>
                               <div>
                                 <div className="font-medium text-white">{student.name || "Unnamed Student"}</div>
-                                <div className="text-xs text-slate-400">ID: {student.user_id.slice(0, 8)}...</div>
+                                <div className="text-xs text-slate-400">{student.email}</div>
                               </div>
                             </div>
                           </TableCell>
                           <TableCell>
-                            <div>
-                              <div className="text-slate-200 text-sm">{student.email}</div>
-                              {student.phone && <div className="text-xs text-slate-400">{student.phone}</div>}
+                            <div className="text-slate-200 text-sm">
+                              {student.phone || "Unknown"}
                             </div>
                           </TableCell>
                           <TableCell>
@@ -1071,7 +1076,16 @@ export default function AdminDashboard() {
                           <div className="text-sm font-medium text-white">
                             {feedback.course_code} - {feedback.course_name}
                           </div>
-                          <Badge variant="secondary" className="bg-yellow-500/20 text-yellow-400">
+                          <Badge 
+                            variant="secondary" 
+                            className={
+                              feedback.rating >= 4 
+                                ? "bg-green-500/20 text-green-400"
+                                : feedback.rating >= 3 
+                                ? "bg-yellow-500/20 text-yellow-400"
+                                : "bg-red-500/20 text-red-400"
+                            }
+                          >
                             {feedback.rating} ⭐
                           </Badge>
                         </div>

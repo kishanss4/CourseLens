@@ -1,5 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.57.4'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -13,24 +13,16 @@ serve(async (req) => {
   }
 
   try {
-    // Create a Supabase admin client
-    const supabaseAdmin = createClient(
+    const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
-      {
-        auth: {
-          autoRefreshToken: false,
-          persistSession: false
-        }
-      }
     )
 
-    // Get the user ID from the request body
     const { userId } = await req.json()
-    
+
     if (!userId) {
       return new Response(
-        JSON.stringify({ error: 'User ID is required' }),
+        JSON.stringify({ error: 'Missing userId parameter' }),
         { 
           status: 400, 
           headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
@@ -38,23 +30,49 @@ serve(async (req) => {
       )
     }
 
-    console.log(`Attempting to delete user: ${userId}`)
+    // Delete user profile first
+    const { error: profileError } = await supabaseClient
+      .from('profiles')
+      .delete()
+      .eq('user_id', userId)
 
-    // Delete the user from auth.users (this will cascade to other tables via foreign keys)
-    const { error: deleteError } = await supabaseAdmin.auth.admin.deleteUser(userId)
+    if (profileError) {
+      console.error('Error deleting profile:', profileError)
+    }
 
-    if (deleteError) {
-      console.error('Error deleting user:', deleteError)
+    // Delete user role
+    const { error: roleError } = await supabaseClient
+      .from('user_roles')
+      .delete()
+      .eq('user_id', userId)
+
+    if (roleError) {
+      console.error('Error deleting user role:', roleError)
+    }
+
+    // Delete user feedback
+    const { error: feedbackError } = await supabaseClient
+      .from('feedback')
+      .delete()
+      .eq('user_id', userId)
+
+    if (feedbackError) {
+      console.error('Error deleting feedback:', feedbackError)
+    }
+
+    // Finally, delete the auth user
+    const { error: authError } = await supabaseClient.auth.admin.deleteUser(userId)
+
+    if (authError) {
+      console.error('Error deleting auth user:', authError)
       return new Response(
-        JSON.stringify({ error: deleteError.message }),
+        JSON.stringify({ error: 'Failed to delete user from auth system' }),
         { 
           status: 500, 
           headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
         }
       )
     }
-
-    console.log(`User ${userId} deleted successfully`)
 
     return new Response(
       JSON.stringify({ message: 'User deleted successfully' }),
@@ -65,7 +83,7 @@ serve(async (req) => {
     )
 
   } catch (error) {
-    console.error('Unexpected error:', error)
+    console.error('Delete user error:', error)
     return new Response(
       JSON.stringify({ error: 'Internal server error' }),
       { 

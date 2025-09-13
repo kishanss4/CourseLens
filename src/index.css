@@ -75,23 +75,22 @@
 
     /* Animation timings - Enhanced */
     --transition-fast: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-    --transition-smooth: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-    --transition-bounce: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-bounce: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
 
-    /* Sidebar colors - Enhanced */
-    --sidebar-background: 220 22% 7%;
-    --sidebar-foreground: 210 20% 92%;
+    /* Glass morphism effects */
+    --glass-backdrop: hsl(220 22% 8% / 0.8);
+    --glass-border: hsl(250 80% 68% / 0.1);
+
+    /* Sidebar specific tokens */
+    --sidebar-background: 220 25% 6%;
+    --sidebar-foreground: 210 20% 96%;
     --sidebar-primary: 250 80% 68%;
     --sidebar-primary-foreground: 220 20% 98%;
-    --sidebar-accent: 220 18% 13%;
-    --sidebar-accent-foreground: 210 20% 92%;
-    --sidebar-border: 220 18% 18%;
+    --sidebar-accent: 220 22% 8%;
+    --sidebar-accent-foreground: 210 20% 95%;
+    --sidebar-border: 220 18% 20%;
     --sidebar-ring: 250 80% 68%;
-
-    /* Glass effect variables - Enhanced */
-    --glass-bg: hsl(220 22% 8% / 0.85);
-    --glass-border: hsl(220 18% 28% / 0.4);
-    --glass-highlight: hsl(250 80% 68% / 0.1);
   }
 }
 
@@ -103,29 +102,36 @@
   body {
     @apply bg-background text-foreground font-sans antialiased;
     background: var(--gradient-surface);
-    min-height: 100vh;
-    overflow-x: hidden;
   }
 
-  /* Scrollbar */
+  /* Enhanced scrollbar styling */
   ::-webkit-scrollbar {
-    width: 10px;
-    height: 10px;
+    width: 8px;
+    height: 8px;
   }
+
   ::-webkit-scrollbar-track {
     background: hsl(var(--muted));
-    border-radius: 5px;
-  }
-  ::-webkit-scrollbar-thumb {
-    background: linear-gradient(135deg, hsl(var(--primary) / 0.7), hsl(var(--accent) / 0.7));
-    border-radius: 5px;
-    border: 1px solid hsl(var(--border));
-  }
-  ::-webkit-scrollbar-thumb:hover {
-    background: linear-gradient(135deg, hsl(var(--primary) / 0.9), hsl(var(--accent) / 0.9));
+    border-radius: 8px;
   }
 
-  /* Selection */
+  ::-webkit-scrollbar-thumb {
+    background: hsl(var(--primary) / 0.5);
+    border-radius: 8px;
+    transition: background 0.2s ease;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--primary) / 0.7);
+  }
+
+  /* Focus states */
+  :focus-visible {
+    outline: 2px solid hsl(var(--primary));
+    outline-offset: 2px;
+  }
+
+  /* Selection styling */
   ::selection {
     background: hsl(var(--primary) / 0.3);
     color: hsl(var(--primary-foreground));
@@ -133,106 +139,136 @@
 }
 
 @layer components {
-  /* ICON FIXES */
-  .form-field-wrapper {
-    position: relative;
-    isolation: isolate;
+  /* Glass morphism utility classes */
+  .glass {
+    background: var(--glass-backdrop);
+    backdrop-filter: blur(12px);
+    border: 1px solid var(--glass-border);
   }
 
-  .input-icon {
-    position: absolute;
-    left: 1rem;
-    top: 50%;
-    transform: translateY(-50%);
-    height: 1.25rem;
-    width: 1.25rem;
-    color: hsl(var(--muted-foreground));
-    z-index: 20;
-    pointer-events: none;
-    transition: color 0.3s ease;
+  .glass-card {
+    @apply glass rounded-xl shadow-medium;
   }
 
-  .form-field-wrapper.group:focus-within .input-icon,
-  .group:focus-within .input-icon {
-    color: hsl(var(--primary));
-  }
-
-  .password-toggle {
-    position: absolute;
-    right: 1rem;
-    top: 50%;
-    transform: translateY(-50%);
-    color: hsl(var(--muted-foreground));
-    z-index: 20;
-    cursor: pointer;
-    padding: 0.25rem;
-    transition: color 0.3s ease;
-    background: transparent;
-    border: none;
-  }
-
-  .password-toggle:hover {
-    color: hsl(var(--primary));
-  }
-
-  .select-icon {
-    position: absolute;
-    left: 1rem;
-    top: 50%;
-    transform: translateY(-50%);
-    height: 1.25rem;
-    width: 1.25rem;
-    color: hsl(var(--muted-foreground));
-    z-index: 20;
-    pointer-events: none;
-  }
-
-  /* FIXED INPUTS (no blur on icons) */
-  .premium-input {
-    background: hsl(var(--input));
-    border: 1px solid hsl(var(--border));
+  /* Premium button variants */
+  .btn-hero {
+    @apply relative overflow-hidden;
+    background: var(--gradient-primary);
+    box-shadow: var(--shadow-colored);
     transition: var(--transition-smooth);
-    position: relative;
-    backdrop-filter: none !important;
-    -webkit-backdrop-filter: none !important;
   }
 
-  .premium-input:focus {
-    border-color: hsl(var(--primary));
-    box-shadow: 0 0 0 3px hsl(var(--primary) / 0.15), var(--shadow-soft), inset 0 1px 0 rgba(255, 255, 255, 0.1);
-    background: hsl(var(--input));
-    transform: translateY(-1px);
+  .btn-hero:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-glow);
   }
 
-  /* ✅ Keep icons sharp */
-  .input-icon,
-  .select-icon,
-  .password-toggle {
-    filter: none !important;
-    backdrop-filter: none !important;
-    -webkit-backdrop-filter: none !important;
-    opacity: 1 !important;
-    visibility: visible !important;
+  .btn-hero:active {
+    transform: translateY(0);
+  }
+
+  /* Animation utilities */
+  .animate-gradient {
+    background-size: 200% 200%;
+    animation: gradient-shift 3s ease infinite;
+  }
+
+  .animate-float {
+    animation: float 6s ease-in-out infinite;
+  }
+
+  .animate-pulse-soft {
+    animation: pulse-soft 2s ease-in-out infinite;
+  }
+
+  /* Layout utilities */
+  .container-fluid {
+    @apply w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+  }
+
+  .section-padding {
+    @apply py-16 lg:py-24;
+  }
+
+  /* Typography enhancements */
+  .text-gradient-primary {
+    background: var(--gradient-primary);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .text-gradient-secondary {
+    background: var(--gradient-secondary);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
   }
 }
 
-/* Mobile adjustments */
-@media (max-width: 768px) {
-  .input-icon,
-  .select-icon {
-    left: 0.75rem;
-    height: 1.125rem;
-    width: 1.125rem;
+@layer utilities {
+  /* Shadow utilities */
+  .shadow-soft {
+    box-shadow: var(--shadow-soft);
   }
-  .password-toggle {
-    right: 0.75rem;
+
+  .shadow-medium {
+    box-shadow: var(--shadow-medium);
+  }
+
+  .shadow-strong {
+    box-shadow: var(--shadow-strong);
+  }
+
+  .shadow-glow {
+    box-shadow: var(--shadow-glow);
+  }
+
+  .shadow-accent {
+    box-shadow: var(--shadow-accent);
+  }
+
+  .shadow-colored {
+    box-shadow: var(--shadow-colored);
+  }
+
+  /* Transition utilities */
+  .transition-fast {
+    transition: var(--transition-fast);
+  }
+
+  .transition-smooth {
+    transition: var(--transition-smooth);
+  }
+
+  .transition-bounce {
+    transition: var(--transition-bounce);
   }
 }
 
-/* Accessibility */
-.focus-visible:focus-visible {
-  outline: 2px solid hsl(var(--primary));
-  outline-offset: 3px;
-  border-radius: 0.25rem;
-  box-shadow: 0 0 0 4px hsl(var(--primary) / 0.2);
+@keyframes gradient-shift {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes pulse-soft {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.8;
+  }
 }
