@@ -76,7 +76,7 @@ export default function StudentDashboard() {
       <div className="max-w-7xl mx-auto p-6">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-foreground mb-2">Student Dashboard</h1>
-          <p className="text-muted-foreground">Track your course feedback and engagement</p>
+          <p className="text-muted-foreground">Your course feedback and engagement</p>
         </div>
 
         {/* Stats Cards */}

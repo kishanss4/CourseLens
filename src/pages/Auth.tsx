@@ -127,7 +127,7 @@ export default function Auth() {
             </div>
           </div>
           <h1 className="text-3xl font-bold text-primary mb-2">CourseLens</h1>
-          <p className="text-muted-foreground">Your gateway to course evaluation excellence</p>
+          <p className="text-muted-foreground">Course Feedback & Management Web App</p>
         </div>
 
         <Card className="card-elevated animate-fade-in-up">
@@ -153,7 +153,7 @@ export default function Auth() {
                       <Input
                         id="signin-email"
                         type="email"
-                        placeholder="student@university.edu"
+                        placeholder="Enter your Email Address"
                         value={signInData.email}
                         onChange={(e) => setSignInData({ ...signInData, email: e.target.value })}
                         className="pl-9"
@@ -204,7 +204,7 @@ export default function Auth() {
                       <Input
                         id="signup-name"
                         type="text"
-                        placeholder="John Doe"
+                        placeholder="Your Name"
                         value={signUpData.name}
                         onChange={(e) => setSignUpData({ ...signUpData, name: e.target.value })}
                         className="pl-9"
@@ -220,7 +220,7 @@ export default function Auth() {
                       <Input
                         id="signup-email"
                         type="email"
-                        placeholder="student@university.edu"
+                        placeholder="Enter your Email Address"
                         value={signUpData.email}
                         onChange={(e) => setSignUpData({ ...signUpData, email: e.target.value })}
                         className="pl-9"
@@ -298,7 +298,7 @@ export default function Auth() {
         </Card>
 
         <div className="text-center mt-6 text-sm text-muted-foreground">
-          <p>By continuing, you agree to our Terms of Service and Privacy Policy</p>
+          <p>POSSPOLE Web Applictaion Assignment</p>
         </div>
       </div>
     </div>
