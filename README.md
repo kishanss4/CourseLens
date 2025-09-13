@@ -4,6 +4,7 @@
 
 CourseLens is a modern course feedback and management platform built with **React + Vite + Supabase**.  
 It provides a scalable and user-friendly system for handling courses, user profiles, and feedback with real-time updates.
+
 🔗 **Live Demo:** [CourseLens Project](https://course-lens-project.vercel.app/)
 
 ---
