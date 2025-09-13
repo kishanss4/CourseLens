@@ -142,11 +142,7 @@ export default function AdminDashboard() {
 
   const fetchAdminData = async () => {
     try {
-      // Get student count
-      const { count: studentCount } = await supabase
-        .from("user_roles")
-        .select("*", { count: "exact", head: true })
-        .eq("role", "student")
+     
 
       const { data: feedbackData } = await supabase
         .from("feedback")
@@ -164,6 +160,7 @@ export default function AdminDashboard() {
           is_blocked,
           created_at
         `)
+      const studentCount = (profilesData?.length || 0) - 1
 
       const { data: usersData } = await supabase.auth.admin.listUsers()
 
