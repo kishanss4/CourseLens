@@ -300,8 +300,8 @@ export default function AdminDashboard() {
   const exportToCSV = () => {
     const headers = ["Student Name", "Student Email", "Course", "Rating", "Message", "Date"]
     const csvData = filteredFeedbacks.map((feedback) => [
-      feedback.user_name || "Unknown",
-      feedback.user_email || "Unknown",
+      feedback.user_name || "Admin",
+      feedback.user_email || "Admin",
       `${feedback.course_code} - ${feedback.course_name}`,
       feedback.rating,
       `"${feedback.message.replace(/"/g, '""')}"`,
