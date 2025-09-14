@@ -50,8 +50,7 @@ export function Navigation() {
 
   const adminNavItems = [
     { path: "/admin", label: "Dashboard", icon: BarChart3 },
-    { path: "/admin/students", label: "Students", icon: Users },
-    { path: "/admin/courses", label: "Courses", icon: BookOpen },
+    
   ]
 
   const navItems = role === "admin" ? adminNavItems : studentNavItems
